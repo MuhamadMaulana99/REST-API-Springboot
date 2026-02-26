@@ -1,25 +1,10 @@
 package com.example.demoapi.repository;
 
 import com.example.demoapi.model.User;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.ArrayList;
-import java.util.List;
+public interface UserRepository extends JpaRepository<User, String> {
 
-@Repository
-public class UserRepository {
+    boolean existsByName(String name);
 
-    private List<User> users = new ArrayList<>();
-
-    public void save(User user) {
-        users.add(user);
-    }
-
-    public List<User> findAll() {
-        return users;
-    }
-
-    public boolean existsByName(String name) {
-        return users.stream().anyMatch(user -> user.getName().equalsIgnoreCase(name));
-    }
 }
