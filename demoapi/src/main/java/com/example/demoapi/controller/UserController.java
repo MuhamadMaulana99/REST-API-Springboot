@@ -1,8 +1,12 @@
 package com.example.demoapi.controller;
 
+import com.example.demoapi.dto.AuthResponse;
+import com.example.demoapi.dto.RegisterResponse;
 import com.example.demoapi.dto.UserRequest;
 import com.example.demoapi.model.User;
 import com.example.demoapi.service.UserService;
+import com.example.demoapi.security.JwtService; // Tambahkan ini
+import org.springframework.security.crypto.password.PasswordEncoder; // Tambahkan ini
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,9 +16,14 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder; // Tambahkan ini
+    private final JwtService jwtService; // Tambahkan ini
 
-    public UserController(UserService userService) {
+    // Update Constructor
+    public UserController(UserService userService, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     @GetMapping
@@ -22,29 +31,61 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    @PostMapping
-    public String createUser(@RequestBody UserRequest request) {
-
+    // Ini berfungsi sebagai REGISTER
+    @PostMapping("/register")
+    public RegisterResponse createUser(@RequestBody UserRequest request) {
         User user = new User();
         user.setName(request.getName());
         user.setAge(request.getAge());
+        user.setEmail(request.getEmail());
 
-        userService.addUser(user);
+        // Enkripsi password
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        return "User berhasil ditambahkan";
+        // Simpan user (Pastikan addUser mengembalikan object User yang sudah tersimpan)
+        User savedUser = userService.addUser(user);
+
+        // Kembalikan response informatif
+        return new RegisterResponse(
+                "User berhasil didaftarkan!",
+                savedUser.getId(),
+                savedUser.getName(),
+                savedUser.getEmail());
+    }
+
+    // Tambahkan Endpoint LOGIN
+    @PostMapping("/login")
+    public AuthResponse login(@RequestBody UserRequest request) {
+        // 1. Cari user
+        User user = userService.getAllUsers().stream()
+                .filter(u -> u.getEmail().equals(request.getEmail()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+
+        // 2. Validasi Password
+        if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            // 3. Generate Token
+            String token = jwtService.generateToken(user.getEmail());
+
+            // 4. Kembalikan Object AuthResponse (Otomatis jadi JSON)
+            return new AuthResponse(
+                    user.getId(), // Pastikan di Model User kamu ada getId()
+                    user.getName(),
+                    user.getEmail(),
+                    token);
+        } else {
+            throw new RuntimeException("Password salah!");
+        }
     }
 
     @PutMapping("/{id}")
-    public User updateUser(@PathVariable String id,
-            @RequestBody UserRequest request) {
-
+    public User updateUser(@PathVariable String id, @RequestBody UserRequest request) {
         return userService.updateUser(id, request);
     }
 
     @DeleteMapping("/{id}")
     public String deleteUser(@PathVariable String id) {
         userService.deleteUser(id);
-        return id;
+        return "Berhasil di hapus";
     }
-
 }

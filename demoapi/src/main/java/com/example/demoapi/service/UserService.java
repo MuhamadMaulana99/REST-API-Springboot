@@ -19,11 +19,8 @@ public class UserService {
     }
 
     // ➕ CREATE USER
-    public void addUser(User user) {
-
-        validateUser(user);
-
-        userRepository.save(user);
+    public User addUser(User user) {
+        return userRepository.save(user); // Tambahkan return agar objek yang tersimpan bisa diambil kembali
     }
 
     // ✅ VALIDASI
