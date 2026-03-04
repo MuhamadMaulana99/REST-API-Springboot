@@ -5,6 +5,12 @@ import com.example.demoapi.exception.BadRequestException;
 import com.example.demoapi.model.User;
 import com.example.demoapi.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.UUID;
+import java.nio.file.*;
+import java.io.IOException;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -46,6 +52,37 @@ public class UserService {
         validateUser(user);
 
         return userRepository.save(user);
+    }
+
+    public String saveImage(MultipartFile file) throws IOException {
+        // 1. Validasi ekstensi (hanya jpg/png)
+        if (file.isEmpty())
+            throw new RuntimeException("File kosong!");
+
+        // 2. Generate nama file unik
+        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+
+        // 3. Simpan ke folder uploads
+        Path uploadPath = Paths.get("uploads");
+        if (!Files.exists(uploadPath))
+            Files.createDirectories(uploadPath);
+
+        Files.copy(file.getInputStream(), uploadPath.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+
+        // 4. Return path yang akan disimpan di DB
+        return "uploads/" + fileName;
+    }
+
+    public void updateUserImagePath(String email, String path) {
+        // 1. Cari user berdasarkan email
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+
+        // 2. Update path-nya
+        user.setProfileImagePath(path);
+
+        // 3. Simpan perubahan ke DB
+        userRepository.save(user);
     }
 
     public void deleteUser(String id) {

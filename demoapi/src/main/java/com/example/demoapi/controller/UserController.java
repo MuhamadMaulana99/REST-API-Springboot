@@ -12,6 +12,9 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder; // Tambahkan ini
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import org.springframework.security.core.Authentication;
 
 // import java.util.List;
 
@@ -28,6 +31,18 @@ public class UserController {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+    }
+
+    @PostMapping("/upload-image")
+    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file, Authentication auth) {
+        try {
+            String path = userService.saveImage(file);
+            // Simpan path ke user yang sedang login (ambil email dari auth)
+            userService.updateUserImagePath(auth.getName(), path);
+            return ResponseEntity.ok("File berhasil diupload: " + path);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Gagal upload: " + e.getMessage());
+        }
     }
 
     @GetMapping

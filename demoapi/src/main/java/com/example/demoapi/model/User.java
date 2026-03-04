@@ -18,6 +18,16 @@ public class User {
 
     private Integer age;
 
+    private String profileImagePath;
+
+    public String getProfileImagePath() {
+        return profileImagePath;
+    }
+
+    public void setProfileImagePath(String profileImagePath) {
+        this.profileImagePath = profileImagePath;
+    }
+
     @Column(unique = true, nullable = false)
     private String email;
 
@@ -52,6 +62,14 @@ public class User {
 
     public void setAge(Integer age) {
         this.age = age;
+    }
+
+    public String getImage() {
+        return profileImagePath;
+    }
+
+    public void setImage(String profileImagePath) {
+        this.profileImagePath = profileImagePath;
     }
 
     public String getEmail() {
