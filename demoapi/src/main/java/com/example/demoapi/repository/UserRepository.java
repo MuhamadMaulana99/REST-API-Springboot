@@ -2,6 +2,8 @@ package com.example.demoapi.repository;
 
 import com.example.demoapi.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, String> {
@@ -11,4 +13,6 @@ public interface UserRepository extends JpaRepository<User, String> {
     boolean existsByEmail(String email);
 
     Optional<User> findByEmail(String email);
+
+    Page<User> findByNameContainingIgnoreCase(String name, Pageable pageable);
 }

@@ -5,8 +5,8 @@ import com.example.demoapi.exception.BadRequestException;
 import com.example.demoapi.model.User;
 import com.example.demoapi.repository.UserRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class UserService {
@@ -56,8 +56,18 @@ public class UserService {
         userRepository.delete(user);
     }
 
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+    }
+
     // 📥 GET ALL USER
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public Page<User> getAllUsers(String name, Pageable pageable) {
+        if (name != null && !name.isEmpty()) {
+            // Jika ada parameter name, cari dengan filter
+            return userRepository.findByNameContainingIgnoreCase(name, pageable);
+        }
+        // Jika tidak ada parameter name, kembalikan semua data paginated
+        return userRepository.findAll(pageable);
     }
 }

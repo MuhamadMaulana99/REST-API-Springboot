@@ -6,10 +6,14 @@ import com.example.demoapi.dto.UserRequest;
 import com.example.demoapi.model.User;
 import com.example.demoapi.service.UserService;
 import com.example.demoapi.security.JwtService; // Tambahkan ini
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder; // Tambahkan ini
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+// import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -27,8 +31,10 @@ public class UserController {
     }
 
     @GetMapping
-    public List<User> getUsers() {
-        return userService.getAllUsers();
+    public ResponseEntity<Page<User>> getUsers(
+            @RequestParam(required = false) String name,
+            @PageableDefault(size = 10, sort = "name") Pageable pageable) {
+        return ResponseEntity.ok(userService.getAllUsers(name, pageable));
     }
 
     // Ini berfungsi sebagai REGISTER
@@ -57,10 +63,7 @@ public class UserController {
     @PostMapping("/login")
     public AuthResponse login(@RequestBody UserRequest request) {
         // 1. Cari user
-        User user = userService.getAllUsers().stream()
-                .filter(u -> u.getEmail().equals(request.getEmail()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+        User user = userService.findByEmail(request.getEmail());
 
         // 2. Validasi Password
         if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
