@@ -29,6 +29,21 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException ex, HttpServletRequest request) {
         return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
     }
+    
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex, HttpServletRequest request) {
+        String message = ex.getMessage();
+        HttpStatus status = HttpStatus.BAD_REQUEST; // Default 400
+
+        // Jika pesan mengandung kata kunci login, paksa jadi 401
+        if (message.contains("tidak ditemukan") || message.contains("salah") || message.contains("invalid")) {
+            status = HttpStatus.UNAUTHORIZED; // 401
+            message = "Email atau Password salah"; // Pesan seragam untuk keamanan
+        }
+
+        return buildResponseEntity(status, message, request);
+    }
 
     // 2. Handle error validasi (biasanya muncul saat @Valid gagal)
     @ExceptionHandler(MethodArgumentNotValidException.class)

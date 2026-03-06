@@ -1,5 +1,7 @@
 package com.example.demoapi.dto;
 
+import lombok.Data;
+
 public class UserRequest {
 
     private String name;
@@ -9,6 +11,12 @@ public class UserRequest {
 
     // constructor kosong (WAJIB untuk JSON mapping)
     public UserRequest() {
+    }
+
+    @Data
+    public static class LoginRequest { // Tambahkan STATIC di sini
+        private String email;
+        private String password;
     }
 
     // constructor dengan parameter

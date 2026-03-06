@@ -27,7 +27,12 @@ public class UserService {
 
     // ➕ CREATE USER
     public User addUser(User user) {
-        return userRepository.save(user); // Tambahkan return agar objek yang tersimpan bisa diambil kembali
+        // 1. Validasi Proaktif: Cek apakah email sudah terdaftar
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            throw new RuntimeException("Email sudah terdaftar, silakan gunakan email lain.");
+        }
+
+        return userRepository.save(user);
     }
 
     // ✅ VALIDASI

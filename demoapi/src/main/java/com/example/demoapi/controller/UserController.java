@@ -3,8 +3,14 @@ package com.example.demoapi.controller;
 import com.example.demoapi.dto.AuthResponse;
 import com.example.demoapi.dto.RegisterResponse;
 import com.example.demoapi.dto.UserRequest;
+import com.example.demoapi.dto.UserRequest.LoginRequest;
 import com.example.demoapi.model.User;
 import com.example.demoapi.service.UserService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import org.springframework.http.MediaType;
+
 import com.example.demoapi.security.JwtService; // Tambahkan ini
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,11 +39,14 @@ public class UserController {
         this.jwtService = jwtService;
     }
 
-    @PostMapping("/upload-image")
-    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file, Authentication auth) {
+    @Operation(summary = "Upload foto profil user")
+    @PostMapping(value = "/upload-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadImage(
+            @Parameter(description = "File gambar (jpg/png) maks 2MB") @RequestParam("file") MultipartFile file,
+            Authentication auth) {
+
         try {
             String path = userService.saveImage(file);
-            // Simpan path ke user yang sedang login (ambil email dari auth)
             userService.updateUserImagePath(auth.getName(), path);
             return ResponseEntity.ok("File berhasil diupload: " + path);
         } catch (Exception e) {
@@ -76,7 +85,7 @@ public class UserController {
 
     // Tambahkan Endpoint LOGIN
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody UserRequest request) {
+    public AuthResponse login(@RequestBody LoginRequest request) {
         // 1. Cari user
         User user = userService.findByEmail(request.getEmail());
 
