@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest; // Atau javax.servlet... tergant
 // import org.springframework.http.ResponseEntity;
 // import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import java.time.LocalDateTime;
 
@@ -35,6 +36,13 @@ public class GlobalExceptionHandler {
             HttpServletRequest request) {
         String message = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
         return buildResponseEntity(HttpStatus.BAD_REQUEST, message, request);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFound(NoResourceFoundException ex,
+            HttpServletRequest request) {
+        String message = "File atau halaman tidak ditemukan: " + ex.getResourcePath();
+        return buildResponseEntity(HttpStatus.NOT_FOUND, message, request);
     }
 
     // 3. CATCH-ALL: Handle semua error lain yang tidak terduga (500 Internal Server

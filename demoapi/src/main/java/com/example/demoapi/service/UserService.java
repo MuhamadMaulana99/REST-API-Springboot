@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
+import java.io.File;
 import java.nio.file.*;
 import java.io.IOException;
 
@@ -73,6 +74,30 @@ public class UserService {
         return "uploads/" + fileName;
     }
 
+    public void deleteUserImage(String email) {
+        // 1. Cari user
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+
+        // 2. Ambil path foto
+        String imagePath = user.getProfileImagePath();
+
+        if (imagePath != null && !imagePath.isEmpty()) {
+            File file = new File(imagePath);
+            if (file.exists()) {
+                if (file.delete()) {
+                    System.out.println("File fisik berhasil dihapus.");
+                }
+            }
+
+            // 3. Hapus path di database
+            user.setProfileImagePath(null);
+            userRepository.save(user);
+        } else {
+            throw new RuntimeException("User memang tidak memiliki foto profil.");
+        }
+    }
+
     public void updateUserImagePath(String email, String path) {
         // 1. Cari user berdasarkan email
         User user = userRepository.findByEmail(email)
@@ -83,6 +108,31 @@ public class UserService {
 
         // 3. Simpan perubahan ke DB
         userRepository.save(user);
+    }
+
+    public String editUserImage(String email, MultipartFile newFile) throws IOException {
+        // 1. Cari user
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+
+        // 2. Hapus file lama dari folder fisik (Jika ada)
+        String oldPath = user.getProfileImagePath();
+        if (oldPath != null && !oldPath.isEmpty()) {
+            File oldFile = new File(oldPath);
+            if (oldFile.exists()) {
+                oldFile.delete();
+            }
+        }
+
+        // 3. Simpan file baru (Gunakan method saveImage yang sudah kita buat
+        // sebelumnya)
+        String newPath = saveImage(newFile);
+
+        // 4. Update path baru ke database
+        user.setProfileImagePath(newPath);
+        userRepository.save(user);
+
+        return newPath;
     }
 
     public void deleteUser(String id) {

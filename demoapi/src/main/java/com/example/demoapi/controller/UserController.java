@@ -101,6 +101,27 @@ public class UserController {
         return userService.updateUser(id, request);
     }
 
+    @PutMapping("/edit-image")
+    public ResponseEntity<?> editImage(@RequestParam("file") MultipartFile file, Authentication auth) {
+        try {
+            String path = userService.editUserImage(auth.getName(), file);
+            return ResponseEntity.ok("Foto profil berhasil diperbarui: " + path);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Gagal memperbarui foto: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/delete-image")
+    public ResponseEntity<?> deleteImage(Authentication auth) {
+        try {
+            // auth.getName() biasanya berisi email/username dari token JWT
+            userService.deleteUserImage(auth.getName());
+            return ResponseEntity.ok("Foto profil berhasil dihapus.");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Gagal menghapus foto: " + e.getMessage());
+        }
+    }
+
     @DeleteMapping("/{id}")
     public String deleteUser(@PathVariable String id) {
         userService.deleteUser(id);
