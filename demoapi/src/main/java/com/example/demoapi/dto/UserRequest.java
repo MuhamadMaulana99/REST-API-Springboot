@@ -2,6 +2,7 @@ package com.example.demoapi.dto;
 
 import lombok.Data;
 
+@Data
 public class UserRequest {
 
     private String name;
@@ -9,14 +10,8 @@ public class UserRequest {
     private Integer age;
     private String password;
 
-    // constructor kosong (WAJIB untuk JSON mapping)
+    // constructor kosong (untuk JSON mapping)
     public UserRequest() {
-    }
-
-    @Data
-    public static class LoginRequest { // Tambahkan STATIC di sini
-        private String email;
-        private String password;
     }
 
     // constructor dengan parameter
@@ -27,36 +22,9 @@ public class UserRequest {
         this.password = password;
     }
 
-    // getter & setter
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public Integer getAge() {
-        return age;
-    }
-
-    public void setAge(Integer age) {
-        this.age = age;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+    @Data
+    public static class LoginRequest {
+        private String email;
+        private String password;
     }
 }
