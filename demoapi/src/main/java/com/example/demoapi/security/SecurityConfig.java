@@ -34,7 +34,9 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/users/register", "/users/login").permitAll()
+                        // Izinkan Swagger UI dan OpenAPI Docs
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/auth/**", "/uploads/**").permitAll()
                         .anyRequest().authenticated())
                 // 3. Daftarkan entry point agar error 401 tampil dengan format JSON Anda
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
