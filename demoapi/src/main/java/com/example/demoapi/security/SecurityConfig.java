@@ -36,6 +36,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Izinkan Swagger UI dan OpenAPI Docs
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/api/logs/**").permitAll()
                         .requestMatchers("/users/login", "/users/register").permitAll()
                         .requestMatchers("/auth/**", "/uploads/**").permitAll()
                         .anyRequest().authenticated())
