@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;
 
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 import org.springframework.security.web.SecurityFilterChain;
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
@@ -36,9 +38,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Izinkan Swagger UI dan OpenAPI Docs
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers("/api/logs/**").permitAll()
+                        // .requestMatchers("/api/logs/**").permitAll()
                         .requestMatchers("/users/login", "/users/register").permitAll()
                         .requestMatchers("/auth/**", "/uploads/**").permitAll()
+                        .requestMatchers("/api/logs/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 // 3. Daftarkan entry point agar error 401 tampil dengan format JSON Anda
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))

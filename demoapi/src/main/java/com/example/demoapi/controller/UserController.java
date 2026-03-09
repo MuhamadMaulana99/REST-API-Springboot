@@ -10,7 +10,6 @@ import com.example.demoapi.service.UserLogService;
 import com.example.demoapi.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.http.MediaType;
@@ -146,6 +145,7 @@ public class UserController {
                     user.getId(), // Pastikan di Model User kamu ada getId()
                     user.getName(),
                     user.getEmail(),
+                    user.getRole(),
                     token);
         } else {
             throw new RuntimeException("Password salah!");
@@ -171,6 +171,10 @@ public class UserController {
         // Update data
         oldUser.setName(newDetails.getName());
         oldUser.setAge(newDetails.getAge());
+
+        if (newDetails.getRole() != null) {
+            oldUser.setRole(newDetails.getRole());
+        }
 
         User updatedUser = userRepository.save(oldUser);
 
